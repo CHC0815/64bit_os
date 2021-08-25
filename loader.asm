@@ -71,22 +71,16 @@ SetVideoMode:
     mov ax, 3       ; set text mode
     int 0x10
 
-    mov si, Message
-    mov ax, 0xb800  ; text buffer
-    mov es, ax
-    xor di, di
-    mov cx, MessageLen
+    cli             ; clear interrupt flag
 
-PrintMessage:
-    mov al, [si]
-    mov [es:di], al
-    mov byte[es:di+1], 0xa  ; bright green
+    lgdt [Gdt32Ptr] ; load global descriptor table
+    lidt [Idt32Ptr] ; load interrupt descriptor table
 
-    add di, 2               ; index
-    add si, 1
-    loop PrintMessage       ; ecx (cx) is counter variable with length
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax    ; enable protected mode
 
-
+    jmp 8:PMEntry
 
 ReadError:
 NotSupport:
@@ -94,7 +88,46 @@ End:
     hlt
     jmp End
 
+; ----------------------------------------------------------------------------------------------------------
+[BITS 32]
+PMEntry:
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov esp, 0x7c00
+
+    mov byte[0xb8000], 'P'
+    mov byte[0xb8001], 0xa
+
+PEnd:
+    hlt
+    jmp PEnd
+
 DriveId: db 0
-Message: db "Text mode is set"
-MessageLen: equ $-Message
 ReadPacket: times 16 db 0       ; 0 size, 2 number of sectors, 4 offset, 6 segment, 8 address lo, 14 address hi
+
+Gdt32:
+    dq 0
+Code32:
+    dw 0xffff
+    dw 0
+    db 0
+    db 0x9a
+    db 0xcf
+    db 0
+Data32:
+    dw 0xffff
+    dw 0
+    db 0
+    db 0x92
+    db 0xcf
+    db 0
+
+Gdt32PtrLen: equ $-Gdt32
+
+Gdt32Ptr: dw Gdt32PtrLen-1
+          dd Gdt32
+
+Idt32Ptr: dw 0
+          dd 0
