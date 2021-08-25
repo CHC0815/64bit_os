@@ -49,6 +49,23 @@ GetMemInfo:
     jnz GetMemInfo
 
 GetMemDone:
+
+TestA20:
+    mov ax, 0xffff
+    mov es, ax
+    ; if A20 line is disabled 0x7c00 and 0x107c00 would be the same 
+    mov word[ds:0x7c00], 0xa200     ; --> 0:0x7c00 = 0 * 16 + 0x7c00 = 0x7c00
+    cmp word[es:0x7c10], 0xa200     ; --> 0xffff:0x7c10 = 0xffff * 16 + 0x7c10 = 0x107c00
+    jne SetA20LineDone
+    ; first check could be lucky so second check for safety
+    mov word[0x7c00], 0xb200
+    cmp word[es:0x7c10], 0xb200
+    je End
+
+
+SetA20LineDone:
+    xor ax, ax
+    mov es, ax      ; reset es after TestA20
     mov ah, 0x13
     mov al, 1
     mov bx, 0xa
@@ -64,6 +81,6 @@ End:
     jmp End
 
 DriveId: db 0
-Message: db "Get Memory Info done!"
+Message: db "a20 line is on"
 MessageLen: equ $-Message
 ReadPacket: times 16 db 0       ; 0 size, 2 number of sectors, 4 offset, 6 segment, 8 address lo, 14 address hi
