@@ -3,7 +3,7 @@
 
 start:
     mov rdi, Idt
-    mov rax, handler0
+    mov rax, Handler0
 
     mov [rdi], ax
     shr rax, 16
@@ -32,11 +32,41 @@ End:
     jmp End
 
 
-handler0:
+Handler0:
+    push rax
+    push rbx
+    push rcx
+    push rdx
+    push rsi
+    push rbp
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+
     mov byte[0xb8000], 'D'
     mov byte[0xb8001], 0xc
 
     jmp End
+
+    push r15
+    push r14
+    push r13
+    push r12
+    push r11
+    push r10
+    push r9
+    push r8
+    push rbp
+    push rsi
+    push rdx
+    push rcx
+    push rbx
+    push rax
 
     iretq
 
