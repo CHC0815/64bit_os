@@ -65,13 +65,30 @@ InitPIC:
     mov al, 11111111b
     out 0xa1, al
 
-    sti
+    ; sti
 
+    push 0x18|3
+    push 0x7c00
+    push 0x2
+    push 0x10|3
+    push UserEntry
+    iretq
 
 End:
     hlt
     jmp End
 
+UserEntry:
+    mov ax, cs
+    and al, 11b     ; check if we are running in ring 3
+    cmp al, 3
+    jne UEnd
+
+    mov byte[0xb8010], 'U'
+    mov byte[0xb8011], 0xe
+
+UEnd:
+    jmp UEnd        ; cannot hlt because we are in ring 3 --> inf loop
 
 Handler0:
     push rax
@@ -152,6 +169,8 @@ Timer:
 Gdt64:
     dq 0
     dq 0x0020980000000000
+    dq 0x0020f80000000000
+    dq 0x0000f20000000000
 
 Gdt64Len: equ $-Gdt64
 
