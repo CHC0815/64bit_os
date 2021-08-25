@@ -44,7 +44,7 @@ start:
     call SetHandler
 
     mov rax,Timer
-    add rdi,Idt+32*16       ; timer at 32th entry
+    mov rdi,Idt+32*16       ; timer at 32th entry
     call SetHandler
 
 
