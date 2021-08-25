@@ -2,25 +2,37 @@
 [ORG 0x200000]
 
 start:
-    mov rdi, Idt
-    mov rax, Handler0       ; div by 0 at 1th entry
+    mov rdi,Idt
+    mov rax,Handler0    ; div by 0 at 1th entry
+    mov [rdi],ax
+    shr rax,16
+    mov [rdi+6],ax
+    shr rax,16
+    mov [rdi+8],eax
 
-    mov [rdi], ax
-    shr rax, 16
-    mov [rdi+6], ax
-    shr rax, 16
-    mov [rdi+8], rax
+    mov rax,Timer
+    add rdi,32*16       ; timer at 32th entry
+    mov [rdi],ax
+    shr rax,16
+    mov [rdi+6],ax
+    shr rax,16
+    mov [rdi+8],eax
 
-    mov rax, Timer
-    add rdi, 32*16          ; timer at 32th entry
-    mov [rdi], ax
-    shr rax, 16
-    mov [rdi+6], ax
-    shr rax, 16
-    mov [rdi+8], rax
 
     lgdt [Gdt64Ptr]
     lidt [IdtPtr]
+
+SetTss:
+    mov rax,Tss
+    mov [TssDesc+2],ax
+    shr rax,16
+    mov [TssDesc+4],al
+    shr rax,8
+    mov [TssDesc+7],al
+    shr rax,8
+    mov [TssDesc+8],eax
+    mov ax,0x20
+    ltr ax
 
     push 8
     push KernelEntry
@@ -42,34 +54,32 @@ InitPIT:
     out 0x40, al    ; high byte
 
 InitPIC:
-    mov al, 0x11
-    out 0x20, al
-    out 0xa0, al
+    mov al,0x11
+    out 0x20,al
+    out 0xa0,al
 
-    mov al, 32
-    out 0x21, al
-    mov al, 40
-    out 0xa1, al
+    mov al,32
+    out 0x21,al
+    mov al,40
+    out 0xa1,al
 
-    mov al, 4
-    out 0x21, al
-    mov al, 2
-    out 0xa1, al
+    mov al,4
+    out 0x21,al
+    mov al,2
+    out 0xa1,al
 
-    mov al, 1
-    out 0x21, al
-    out 0xa1, al
+    mov al,1
+    out 0x21,al
+    out 0xa1,al
 
-    mov al, 11111110b
-    out 0x21, al
-    mov al, 11111111b
-    out 0xa1, al
-
-    ; sti
+    mov al,11111110b
+    out 0x21,al
+    mov al,11111111b
+    out 0xa1,al
 
     push 0x18|3
     push 0x7c00
-    push 0x2
+    push 0x202              ; interrupt is enabled
     push 0x10|3
     push UserEntry
     iretq
@@ -79,16 +89,16 @@ End:
     jmp End
 
 UserEntry:
-    mov ax, cs
-    and al, 11b     ; check if we are running in ring 3
-    cmp al, 3
-    jne UEnd
+    ; mov ax, cs
+    ; and al, 11b     ; check if we are running in ring 3
+    ; cmp al, 3
+    ; jne UEnd
 
-    mov byte[0xb8010], 'U'
-    mov byte[0xb8011], 0xe
+    inc byte[0xb8010]
+    mov byte[0xb8011], 0xf
 
 UEnd:
-    jmp UEnd        ; cannot hlt because we are in ring 3 --> inf loop
+    jmp UserEntry        ; cannot hlt because we are in ring 3 --> inf loop
 
 Handler0:
     push rax
@@ -96,6 +106,7 @@ Handler0:
     push rcx
     push rdx
     push rsi
+    push rdi
     push rbp
     push r8
     push r9
@@ -111,20 +122,21 @@ Handler0:
 
     jmp End
 
-    push r15
-    push r14
-    push r13
-    push r12
-    push r11
-    push r10
-    push r9
-    push r8
-    push rbp
-    push rsi
-    push rdx
-    push rcx
-    push rbx
-    push rax
+    pop	r15
+    pop	r14
+    pop	r13
+    pop	r12
+    pop	r11
+    pop	r10
+    pop	r9
+    pop	r8
+    pop	rbp
+    pop	rdi
+    pop	rsi  
+    pop	rdx
+    pop	rcx
+    pop	rbx
+    pop	rax
 
     iretq
 
@@ -134,6 +146,7 @@ Timer:
     push rcx
     push rdx
     push rsi
+    push rdi
     push rbp
     push r8
     push r9
@@ -144,25 +157,27 @@ Timer:
     push r14
     push r15
 
-    mov byte[0xb8010], 'T'
-    mov byte[0xb8011], 0xe
+    inc byte[0xb8020]
+    mov byte[0xb8021], 0xe
 
-    jmp End
+    mov al, 0x20
+    out 0x20, al
 
-    push r15
-    push r14
-    push r13
-    push r12
-    push r11
-    push r10
-    push r9
-    push r8
-    push rbp
-    push rsi
-    push rdx
-    push rcx
-    push rbx
-    push rax
+    pop	r15
+    pop	r14
+    pop	r13
+    pop	r12
+    pop	r11
+    pop	r10
+    pop	r9
+    pop	r8
+    pop	rbp
+    pop	rdi
+    pop	rsi  
+    pop	rdx
+    pop	rcx
+    pop	rbx
+    pop	rax
 
     iretq
 
@@ -171,6 +186,14 @@ Gdt64:
     dq 0x0020980000000000
     dq 0x0020f80000000000
     dq 0x0000f20000000000
+TssDesc:                        ; part of gdt
+    dw TssLen-1
+    dw 0
+    db 0
+    db 0x89
+    db 0
+    db 0
+    dq 0
 
 Gdt64Len: equ $-Gdt64
 
@@ -192,3 +215,11 @@ IdtLen: equ $-Idt
 
 IdtPtr: dw IdtLen-1
         dq Idt
+
+Tss:
+    dd 0
+    dq 0x150000
+    times 88 db 0
+    dd TssLen
+
+TssLen: equ $-Tss
