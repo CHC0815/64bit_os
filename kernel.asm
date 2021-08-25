@@ -1,23 +1,56 @@
 [BITS 64]
 [ORG 0x200000]
 
+%macro push_state 0
+    push rax
+    push rbx
+    push rcx
+    push rdx
+    push rsi
+    push rdi
+    push rbp
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+%endmacro
+
+%macro pop_state 0
+    pop	r15
+    pop	r14
+    pop	r13
+    pop	r12
+    pop	r11
+    pop	r10
+    pop	r9
+    pop	r8
+    pop	rbp
+    pop	rdi
+    pop	rsi  
+    pop	rdx
+    pop	rcx
+    pop	rbx
+    pop	rax
+%endmacro
+
+
 start:
     mov rdi,Idt
-    mov rax,Handler0    ; div by 0 at 1th entry
-    mov [rdi],ax
-    shr rax,16
-    mov [rdi+6],ax
-    shr rax,16
-    mov [rdi+8],eax
+    mov rax,Handler0        ; div by 0 at 1th entry
+    call SetHandler
 
     mov rax,Timer
-    add rdi,32*16       ; timer at 32th entry
-    mov [rdi],ax
-    shr rax,16
-    mov [rdi+6],ax
-    shr rax,16
-    mov [rdi+8],eax
+    add rdi,Idt+32*16       ; timer at 32th entry
+    call SetHandler
 
+
+    mov rdi, Idt+32*16+7*16
+    mov rax, SIRQ
+    call SetHandler
 
     lgdt [Gdt64Ptr]
     lidt [IdtPtr]
@@ -88,6 +121,14 @@ End:
     hlt
     jmp End
 
+SetHandler:
+    mov [rdi],ax
+    shr rax,16
+    mov [rdi+6],ax
+    shr rax,16
+    mov [rdi+8],eax
+    ret
+
 UserEntry:
     ; mov ax, cs
     ; and al, 11b     ; check if we are running in ring 3
@@ -101,61 +142,19 @@ UEnd:
     jmp UserEntry        ; cannot hlt because we are in ring 3 --> inf loop
 
 Handler0:
-    push rax
-    push rbx
-    push rcx
-    push rdx
-    push rsi
-    push rdi
-    push rbp
-    push r8
-    push r9
-    push r10
-    push r11
-    push r12
-    push r13
-    push r14
-    push r15
+    push_state
 
     mov byte[0xb8000], 'D'
     mov byte[0xb8001], 0xc
 
     jmp End
 
-    pop	r15
-    pop	r14
-    pop	r13
-    pop	r12
-    pop	r11
-    pop	r10
-    pop	r9
-    pop	r8
-    pop	rbp
-    pop	rdi
-    pop	rsi  
-    pop	rdx
-    pop	rcx
-    pop	rbx
-    pop	rax
+    pop_state
 
     iretq
 
 Timer:
-    push rax
-    push rbx
-    push rcx
-    push rdx
-    push rsi
-    push rdi
-    push rbp
-    push r8
-    push r9
-    push r10
-    push r11
-    push r12
-    push r13
-    push r14
-    push r15
+    push_state
 
     inc byte[0xb8020]
     mov byte[0xb8021], 0xe
@@ -163,21 +162,25 @@ Timer:
     mov al, 0x20
     out 0x20, al
 
-    pop	r15
-    pop	r14
-    pop	r13
-    pop	r12
-    pop	r11
-    pop	r10
-    pop	r9
-    pop	r8
-    pop	rbp
-    pop	rdi
-    pop	rsi  
-    pop	rdx
-    pop	rcx
-    pop	rbx
-    pop	rax
+    pop_state
+
+    iretq
+
+SIRQ:
+    push_state
+
+    mov al, 11
+    out 0x20, al
+    in al, 0x20
+
+    test al, (1<<7)
+    jz .end
+
+    mov al, 0x20
+    out 0x20, al
+
+.end:                           ; local variable
+    pop_state
 
     iretq
 
