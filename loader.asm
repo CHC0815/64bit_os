@@ -139,7 +139,7 @@ LMEntry:
     mov rdi, 0x200000
     mov rsi, 0x10000
     mov rcx, 51200/8
-    rep movsq
+    rep movsq                   ; repeat movsq, counter rcx, from rdi to rsi
 
     jmp 0x200000
 
