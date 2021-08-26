@@ -33,4 +33,4 @@ run: clean all
 
 .PHONY: clean
 clean:
-	rm *.o *.bin kernel
+	rm -f *.o *.bin kernel
