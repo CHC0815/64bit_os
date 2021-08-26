@@ -87,12 +87,8 @@ InitPIC:
     retf
 
 KernelEntry:
-    xor ax, ax
-    mov ss, ax
-
     mov rsp, 0x200000       ; stack pointer for c code
     call KMain
-    sti
 
 End:
     hlt

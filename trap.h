@@ -71,4 +71,4 @@ void eoi(void);
 void load_idt(struct IdtPtr *ptr);
 unsigned char read_isr(void);
 
-#endif _TRAP_H
+#endif
