@@ -3,7 +3,8 @@ ENTRY(start)
 
 SECTIONS
 {
-    . = 0x200000;                    /* Kernel location */
+    . = 0xffff800000200000;                    /* Kernel location */
+    
     .text : {
         *(.text)
     }

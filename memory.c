@@ -6,7 +6,7 @@ static struct FreeMemRegion free_mem_region[50];
 
 void init_memory(void)
 {
-    int32_t count = *(int32_t *)0x9000;
+    int32_t count = *(int32_t *)0x9000; // loader.asm will load memory data to this loaction
     uint64_t total_mem = 0;
     struct E820 *mem_map = (struct E820 *)0x9008;
     int free_region_count = 0;

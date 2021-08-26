@@ -21,7 +21,7 @@ Gdt64Ptr: dw Gdt64Len-1
 
 Tss:
     dd 0
-    dq 0x150000
+    dq 0xffff800000190000
     times 88 db 0
     dd TssLen
 
@@ -33,17 +33,19 @@ extern KMain
 global start
 
 start:
-    lgdt [Gdt64Ptr]
+    mov rax, Gdt64Ptr
+    lgdt [rax]
 
 SetTss:
     mov rax,Tss
-    mov [TssDesc+2],ax
+    mov rdi,TssDesc
+    mov [rdi+2],ax
     shr rax,16
-    mov [TssDesc+4],al
+    mov [rdi+4],al
     shr rax,8
-    mov [TssDesc+7],al
+    mov [rdi+7],al
     shr rax,8
-    mov [TssDesc+8],eax
+    mov [rdi+8],eax
     mov ax,0x20
     ltr ax
 
@@ -81,14 +83,15 @@ InitPIC:
     out 0xa1,al
 
     ; setup kernel entry jump
+    mov rax,KernelEntry
     push 8
-    push KernelEntry
+    push rax
     db 0x48
     retf
 
 KernelEntry:
-    mov rsp, 0x200000       ; stack pointer for c code
-    call KMain
+    mov rsp,0xffff800000200000
+    call KMain                      ; stack pointer for c code        --> points to the same physical page / address 0x200000
 
 End:
     hlt
