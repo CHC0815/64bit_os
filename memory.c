@@ -2,12 +2,15 @@
 #include "print.h"
 #include "debug.h"
 #include "stddef.h"
+#include "stdbool.h"
+#include "lib.h"
 
 static void free_region(uint64_t v, uint64_t e);
 
 static struct FreeMemRegion free_mem_region[50];
 static struct Page free_memory; //head of linked list
 static uint64_t memory_end;
+uint64_t page_map;
 extern char end; // end of kernel -> from linker script
 
 void init_memory(void)
@@ -82,7 +85,111 @@ void *kalloc(void)
         ASSERT((uint64_t)page_address % PAGE_SIZE == 0);                  // page aligned
         ASSERT((uint64_t)page_address >= (uint64_t)&end);                 // virtual address is not within the kernel
         ASSERT((uint64_t)page_address + PAGE_SIZE <= 0xffff800040000000); // address is not beyond 1GB
+        free_memory.next = page_address->next;
     }
 
-    return (void *)page_address;
+    return page_address;
+}
+
+static PDPTR find_pml4t_entry(uint64_t map, uint64_t v, int alloc, uint32_t attribute)
+{
+    PDPTR *map_entry = (PDPTR *)map;
+    PDPTR pdptr = NULL;
+    unsigned int index = (v >> 39) & 0x1FF;
+
+    if ((uint64_t)map_entry[index] & PTE_P)
+    {
+        pdptr = (PDPTR)P2V(PDE_ADDR(map_entry[index]));
+    }
+    else if (alloc == 1)
+    {
+        pdptr = (PDPTR)kalloc();
+        if (pdptr != NULL)
+        {
+            memset(pdptr, 0, PAGE_SIZE);
+            map_entry[index] = (PDPTR)(V2P(pdptr) | attribute);
+        }
+    }
+
+    return pdptr;
+}
+
+static PD find_pdpt_entry(uint64_t map, uint64_t v, int alloc, uint32_t attribute)
+{
+    PDPTR pdptr = NULL;
+    PD pd = NULL;
+    unsigned int index = (v >> 30) & 0x1FF;
+
+    pdptr = find_pml4t_entry(map, v, alloc, attribute);
+    if (pdptr == NULL)
+        return NULL;
+
+    if ((uint64_t)pdptr[index] & PTE_P)
+    {
+        pd = (PD)P2V(PDE_ADDR(pdptr[index]));
+    }
+    else if (alloc == 1)
+    {
+        pd = (PD)kalloc();
+        if (pd != NULL)
+        {
+            memset(pd, 0, PAGE_SIZE);
+            pdptr[index] = (PD)(V2P(pd) | attribute);
+        }
+    }
+
+    return pd;
+}
+
+bool map_pages(uint64_t map, uint64_t v, uint64_t e, uint64_t pa, uint32_t attribute)
+{
+    uint64_t vstart = PA_DOWN(v);
+    uint64_t vend = PA_UP(e);
+    PD pd = NULL;
+    unsigned int index;
+
+    ASSERT(v < e);                                    // check start and end
+    ASSERT(pa % PAGE_SIZE == 0);                      // page aligned
+    ASSERT(pa + vend - vstart <= 1024 * 1024 * 1024); // check if end is outside of 1GB
+
+    do
+    {
+        pd = find_pdpt_entry(map, vstart, 1, attribute); // find page directory pointer table entry
+        if (pd == NULL)
+        {
+            return false;
+        }
+
+        index = (vstart >> 21) & 0x1FF;
+        ASSERT(((uint64_t)pd[index] & PTE_P) == 0);
+
+        pd[index] = (PDE)(pa | attribute | PTE_ENTRY);
+
+        vstart += PAGE_SIZE;
+        pa += PAGE_SIZE;
+    } while (vstart + PAGE_SIZE <= vend);
+
+    return true;
+}
+
+void switch_vm(uint64_t map)
+{
+    load_cr3(V2P(map));
+}
+
+static void setup_kvm(void)
+{
+    page_map = (uint64_t)kalloc();
+    ASSERT(page_map != 0);
+
+    memset((void *)page_map, 0, PAGE_SIZE);
+    bool status = map_pages(page_map, KERNEL_BASE, memory_end, V2P(KERNEL_BASE), PTE_P | PTE_W);
+    ASSERT(status == true);
+}
+
+void init_kvm(void)
+{
+    setup_kvm();
+    switch_vm(page_map);
+    printk("memory manager is worling now");
 }
