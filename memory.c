@@ -197,7 +197,7 @@ void init_kvm(void)
     uint64_t page_map = setup_kvm();
     ASSERT(page_map != 0);
     switch_vm(page_map);
-    printk("memory manager is worling now");
+    printk("memory manager is working now");
 }
 
 bool setup_uvm(uint64_t map, uint64_t start, int size)
