@@ -1,4 +1,6 @@
 *.bin
 *.img
 *.o
+*.a
 kernel
+user
