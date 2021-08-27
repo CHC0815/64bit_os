@@ -5,7 +5,7 @@ LDFLAGS = -nostdlib -T link.lds
 
 
 bins = boot.bin loader.bin
-objs = kernel.o trapa.o liba.o main.o trap.o print.o debug.o memory.o process.o
+objs = kernel.o trapa.o liba.o main.o trap.o print.o debug.o memory.o process.o syscall.o
 
 binaries = $(bins) $(objs)
 
