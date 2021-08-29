@@ -14,10 +14,10 @@ objs = start.o main.o
 	$(CC) $(CFLAGS) -c $<
 
 all: clean $(objs)
-	$(LD) $(LDFLAGS) -o user $(objs) $(libs)
-	objcopy -O binary user user.bin
-	mv user.bin ../boot/user.bin
+	$(LD) $(LDFLAGS) -o user1 $(objs) $(libs)
+	objcopy -O binary user1 user1.bin
+	mv -f user1.bin ../boot/user1.bin
 
 .PHONY: clean
 clean:
-	rm -f *.o *.a *.bin user
+	rm -f *.o *.a *.bin user1

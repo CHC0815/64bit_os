@@ -28,6 +28,8 @@ global load_idt
 global load_cr3
 global pstart
 global read_cr2
+global TrapReturn
+global swap
 
 
 Trap:
@@ -205,3 +207,24 @@ read_cr2:
 pstart:
     mov rsp, rdi
     jmp TrapReturn
+
+swap:
+    push rbx
+    push rbp
+    push r12
+    push r13
+    push r14
+    push r15
+    
+                        ; change kernel stack pointer to another process
+    mov [rdi], rsp      ; rdi the address of context field in process
+    mov rsp, rsi        ; rsi the context value in the next process
+
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbp
+    pop rbx
+
+    ret

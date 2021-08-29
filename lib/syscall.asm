@@ -10,7 +10,7 @@ writeu:
 
     mov rdi, 2  ; 2 arguments
     mov rsi, rsp
-    int 0x80
+    int 0x80            ; software interrupt --> handeled in trap.c --> syscall.c
 
     add rsp, 16
     ret

@@ -3,7 +3,8 @@
 clean:
 	$(MAKE) -C boot clean
 	$(MAKE) -C lib clean
-	$(MAKE) -C userland clean
+	$(MAKE) -C user1 clean
+	$(MAKE) -C user2 clean
 all:
 	$(MAKE) -C boot all
 run:
@@ -11,4 +12,5 @@ run:
 lib: 
 	$(MAKE) -C lib lib
 userland:
-	$(MAKE) -C userland all
+	$(MAKE) -C user1 all
+	$(MAKE) -C user2 all
