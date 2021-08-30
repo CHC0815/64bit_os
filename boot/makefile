@@ -5,7 +5,7 @@ LDFLAGS = -nostdlib -T link.lds
 
 
 bins = boot.bin loader.bin
-objs = kernel.o trapa.o liba.o main.o trap.o print.o debug.o memory.o process.o syscall.o lib.o
+objs = kernel.o trapa.o liba.o main.o trap.o print.o debug.o memory.o process.o syscall.o lib.o keyboard.o
 
 binaries = $(bins) $(objs)
 
@@ -33,6 +33,7 @@ all: $(binaries)
 
 run: clean all
 	echo c | bochs
+	# /mnt/c/Program\ Files/Bochs-2.7/bochs.exe -f 'S:\Programming\64bit_os\win_bochsrc.bxrc'
 
 .PHONY: clean
 clean:

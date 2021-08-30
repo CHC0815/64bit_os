@@ -2,6 +2,7 @@
 #include "print.h"
 #include "syscall.h"
 #include "process.h"
+#include "keyboard.h"
 
 static struct IdtPtr idt_pointer;
 static struct IdtEntry vectors[256];
@@ -37,8 +38,9 @@ void init_idt(void)
     init_idt_entry(&vectors[18], (uint64_t)vector18, 0x8e);
     init_idt_entry(&vectors[19], (uint64_t)vector19, 0x8e);
     init_idt_entry(&vectors[32], (uint64_t)vector32, 0x8e);
+    init_idt_entry(&vectors[33], (uint64_t)vector33, 0x8e);
     init_idt_entry(&vectors[39], (uint64_t)vector39, 0x8e);
-    init_idt_entry(&vectors[0x80], (uint64_t)sysint, 0xee); // system call print
+    init_idt_entry(&vectors[0x80], (uint64_t)sysint, 0xee); // system call
 
     idt_pointer.limit = sizeof(vectors) - 1;
     idt_pointer.addr = (uint64_t)vectors;
@@ -65,6 +67,11 @@ void handler(struct TrapFrame *tf)
     // timer
     case 32:
         timer_handler();
+        eoi();
+        break;
+    // keyboard
+    case 33:
+        keyboard_handler();
         eoi();
         break;
     //

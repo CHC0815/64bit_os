@@ -3,10 +3,12 @@
 
 int main(void)
 {
-    char *p = (char *)0xffff800000200200; // in kernel address space
-    *p = 1;                               //should cause exception
 
-    printf("Process2 %d\n");
-    sleepu(1000);
+    char ch[2] = {0};
+    while (1)
+    {
+        ch[0] = keyboard_readu();
+        printf("%s", ch);
+    }
     return 0;
 }

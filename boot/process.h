@@ -60,5 +60,6 @@ void swap(uint64_t *prev, uint64_t next);
 void sleep(int wait);
 void wake_up(int wait);
 void exit(void);
+void wait(void);
 
 #endif

@@ -3,6 +3,7 @@ global writeu
 global sleepu
 global exitu
 global waitu
+global keyboard_readu
 
 writeu:
     sub rsp, 16         ; allocate space 
@@ -42,6 +43,14 @@ exitu:
 waitu:
     mov eax, 3      ; index 3
     mov rdi, 0      ; no args
+
+    int 0x80
+
+    ret
+
+keyboard_readu:
+    mov eax, 4
+    mov rdi, 0
 
     int 0x80
 
