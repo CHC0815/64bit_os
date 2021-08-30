@@ -29,6 +29,7 @@ all: $(binaries)
 	dd if=kernel.bin of=boot.img bs=512 count=100 seek=6 conv=notrunc
 	dd if=user1.bin of=boot.img bs=512 count=10 seek=106 conv=notrunc
 	dd if=user2.bin of=boot.img bs=512 count=10 seek=116 conv=notrunc
+	dd if=user3.bin of=boot.img bs=512 count=10 seek=126 conv=notrunc
 
 run: clean all
 	echo c | bochs
@@ -37,8 +38,11 @@ run: clean all
 clean:
 	mv -f user1.bin user1.bin.keep
 	mv -f user2.bin user2.bin.keep
+	mv -f user3.bin user3.bin.keep
+	
 	
 	rm -f *.o *.bin kernel
 	
 	mv -f user1.bin.keep user1.bin
 	mv -f user2.bin.keep user2.bin
+	mv -f user3.bin.keep user3.bin
