@@ -5,5 +5,5 @@
 kernel
 userland/console/console
 userland/idle/idle
-userland/user/user1
+userland/user1/user1
 *.lock
