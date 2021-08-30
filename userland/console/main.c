@@ -2,12 +2,29 @@
 #include "stdint.h"
 #include "console.h"
 
+static char buffer[80] = {0};
+int buffer_size = 0;
+
 static void cmd_get_total_memory(void)
 {
     uint64_t total;
 
     total = get_total_memoryu();
     printf("Total Memory is %dMB\n", total);
+}
+
+static void cmd_echo()
+{
+    char buff[buffer_size];
+    if (buffer_size - 5 <= 0)
+    {
+        printf("Something went wrong in the echo command!\n");
+    }
+    else
+    {
+        memcpy(&buff, &buffer + 5, buffer_size - 5);
+        printf("%s\n", buffer + 5);
+    }
 }
 
 static int read_cmd(char *buffer)
@@ -50,24 +67,26 @@ static int parse_cmd(char *buffer, int buffer_size)
     {
         cmd = 0;
     }
+    else if (!memcmp("echo ", buffer, 5))
+    {
+        cmd = 1;
+    }
 
     return cmd;
 }
 
 static void execute_cmd(int cmd)
 {
-    CmdFunc cmd_list[1] = {cmd_get_total_memory};
+    CmdFunc cmd_list[2] = {cmd_get_total_memory, cmd_echo};
 
-    if (cmd == 0)
+    if (cmd >= 0 && cmd < 2)
     {
-        cmd_list[0]();
+        cmd_list[cmd]();
     }
 }
 
 int main(void)
 {
-    char buffer[80] = {0};
-    int buffer_size = 0;
     int cmd = 0;
 
     while (1)
