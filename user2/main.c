@@ -3,14 +3,10 @@
 
 int main(void)
 {
-    int64_t counter = 0;
     while (1)
     {
-        if (counter % 10000000 == 0)
-        {
-            printf("Process2 %d\n", counter);
-        }
-        counter++;
+        printf("Process2 %d\n");
+        sleepu(1000);
     }
     return 0;
 }
