@@ -3,7 +3,7 @@
 *.o
 *.a
 kernel
-user1/user1
-user2/user2
-user3/user3
+userland/console/console
+userland/idle/idle
+userland/user/user1
 *.lock

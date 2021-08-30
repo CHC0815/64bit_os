@@ -10,12 +10,12 @@ static void free_region(uint64_t v, uint64_t e);
 static struct FreeMemRegion free_mem_region[50];
 static struct Page free_memory; //head of linked list
 static uint64_t memory_end;
+static uint64_t total_mem = 0;
 extern char end; // end of kernel -> from linker script
 
 void init_memory(void)
 {
     int32_t count = *(int32_t *)0x9000; // loader.asm will load memory data to this loaction
-    uint64_t total_mem = 0;
     struct E820 *mem_map = (struct E820 *)0x9008;
     int free_region_count = 0;
 
@@ -62,6 +62,11 @@ static void free_region(uint64_t v, uint64_t e)
             kfree(start);
         }
     }
+}
+
+uint64_t get_total_memory(void)
+{
+    return total_mem / 1024 / 1024;
 }
 
 void kfree(uint64_t v)

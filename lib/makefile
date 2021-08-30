@@ -4,7 +4,7 @@ LD = ld
 CFLAGS = -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone
 LDFLAGS = -nostdlib -T link.lds
 
-objs = syscall.o print.o
+objs = syscall.o print.o lib.o
 
 %.o : %.asm
 	nasm -f elf64 -o $@ $<

@@ -2,6 +2,14 @@
 #include "stdint.h"
 #include "console.h"
 
+static void cmd_get_total_memory(void)
+{
+    uint64_t total;
+
+    total = get_total_memoryu();
+    printf("Total Memory is %dMB\n", total);
+}
+
 static int read_cmd(char *buffer)
 {
     char ch[2] = {0};
@@ -30,6 +38,8 @@ static int read_cmd(char *buffer)
             printf("%s", ch);
         }
     }
+
+    return buffer_size;
 }
 
 static int parse_cmd(char *buffer, int buffer_size)
@@ -40,7 +50,18 @@ static int parse_cmd(char *buffer, int buffer_size)
     {
         cmd = 0;
     }
+
     return cmd;
+}
+
+static void execute_cmd(int cmd)
+{
+    CmdFunc cmd_list[1] = {cmd_get_total_memory};
+
+    if (cmd == 0)
+    {
+        cmd_list[0]();
+    }
 }
 
 int main(void)

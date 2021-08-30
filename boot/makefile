@@ -41,7 +41,6 @@ clean:
 	mv -f console.bin console.bin.keep
 	mv -f idle.bin idle.bin.keep
 	
-	
 	rm -f *.o *.bin kernel
 	
 	mv -f user1.bin.keep user1.bin
