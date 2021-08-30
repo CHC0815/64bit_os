@@ -54,6 +54,19 @@ LoadUser2:
     int 0x13
     jc ReadError
 
+LoadUser3:
+    mov si, ReadPacket
+    mov word[si], 0x10      ; size 16 bytes
+    mov word[si+2], 10      ; number of sectors
+    mov word[si+4], 0       ; offset
+    mov word[si+6], 0x4000  ; segment
+    mov dword[si+8], 126    ; address lo
+    mov dword[si+0xc], 0    ; address hi
+    mov dl, [DriveId]
+    mov ah, 0x42
+    int 0x13
+    jc ReadError
+
 GetMemInfoStart:
     mov eax, 0xe820
     mov edx, 0x534d4150
