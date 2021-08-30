@@ -81,9 +81,18 @@ void handler(struct TrapFrame *tf)
         break;
 
     default:
-        printk("[Error %d at ring %d] %d:%x %x", tf->trapno, (tf->cs & 3), tf->errorcode, read_cr2(), tf->rip);
-        while (1)
+        // check if exception is generated in usermode --> lower 3 bits are set
+        if ((tf->cs & 3) == 3)
         {
+            printk("Exception is %d\n", tf->trapno);
+            exit(); //terminate the current process (with the error)
+        }
+        else
+        {
+            printk("[Error %d at ring %d] %d:%x %x", tf->trapno, (tf->cs & 3), tf->errorcode, read_cr2(), tf->rip);
+            while (1)
+            {
+            }
         }
     }
     if (tf->trapno == 32)
