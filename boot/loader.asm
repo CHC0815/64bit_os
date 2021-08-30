@@ -28,6 +28,7 @@ LoadKernel:
     int 0x13
     jc ReadError
 
+;   user1
 LoadUser:
     mov si, ReadPacket
     mov word[si], 0x10      ; size 16 bytes
@@ -41,6 +42,7 @@ LoadUser:
     int 0x13
     jc ReadError
 
+;   console
 LoadUser2:
     mov si, ReadPacket
     mov word[si], 0x10      ; size 16 bytes
@@ -54,6 +56,7 @@ LoadUser2:
     int 0x13
     jc ReadError
 
+;   idle
 LoadUser3:
     mov si, ReadPacket
     mov word[si], 0x10      ; size 16 bytes

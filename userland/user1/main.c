@@ -1,4 +1,4 @@
-#include "../lib/lib.h"
+#include "lib.h"
 #include "stdint.h"
 
 int main(void)

@@ -1,11 +1,12 @@
-PROG_NAME = user3
+PROG_NAME = idle
 
 CC = gcc
 LD = ld
-CFLAGS = -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone
+INCLUDES = -I. -I../../lib/
+CFLAGS = -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zone $(INCLUDES)
 LDFLAGS = -nostdlib -T link.lds
 
-libs = ../lib/lib.a
+libs = ../../lib/lib.a
 objs = start.o main.o
 
 %.o : %.asm
@@ -15,9 +16,9 @@ objs = start.o main.o
 	$(CC) $(CFLAGS) -c $<
 
 all: clean $(objs)
-	$(LD) $(LDFLAGS) -o user3 $(objs) $(libs)
+	$(LD) $(LDFLAGS) -o $(PROG_NAME) $(objs) $(libs)
 	objcopy -O binary $(PROG_NAME) $(PROG_NAME).bin
-	mv -f $(PROG_NAME).bin ../boot/$(PROG_NAME).bin
+	mv -f $(PROG_NAME).bin ../../boot/$(PROG_NAME).bin
 
 .PHONY: clean
 clean:
