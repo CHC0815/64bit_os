@@ -2,11 +2,11 @@
 [ORG 0x7c00]
 
 start:
-    xor ax, ax
-    mov ds, ax
-    mov es, ax
-    mov ss, ax
-    mov sp, 0x7c00
+    xor ax,ax   
+    mov ds,ax
+    mov es,ax  
+    mov ss,ax
+    mov sp,0x7c00
 
 TestDiskExtension:
     mov [DriveId], dl
@@ -20,7 +20,7 @@ TestDiskExtension:
 LoadLoader:
     mov si, ReadPacket
     mov word[si], 0x10      ; size 16 bytes
-    mov word[si+2], 5       ; number of sectors
+    mov word[si+2], 15      ; number of sectors
     mov word[si+4], 0x7e00  ; offset
     mov word[si+6], 0       ; segment 
     mov dword[si+8], 1      ; address lo
@@ -49,17 +49,17 @@ End:
 
 
 DriveId: db 0
-Message: db "We have a error in boot process"
+Message: db "We have an error in boot process"
 MessageLen: equ $-Message
 ReadPacket: times 16 db 0       ; 0 size, 2 number of sectors, 4 offset, 6 segment, 8 address lo, 14 address hi
 
 times (0x1be-($-$$)) db 0
     db 80h                      ; boot indicator
-    db 0, 2, 0                  ; starting chs
-    db 0f0h                     ; type
-    db 0ffh, 0ffh, 0ffh         ; ending chs
-    dd 1                        ; starting sector
-    dd (20*16*63-1)             ; size
+    db 1, 1, 0                  ; starting chs
+    db 06h                      ; type
+    db 0fh, 03fh, 0cah          ; ending chs
+    dd 3fh                      ; starting sector
+    dd 031f11h                  ; size
 
     times (16*3) db 0
 
