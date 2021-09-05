@@ -4,7 +4,7 @@ CFLAGS = -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zo
 LDFLAGS = -nostdlib -T link.lds
 
 bins = loader.bin
-objs = entry.o liba.o main.o print.o debug.o 
+objs = entry.o liba.o main.o print.o debug.o file.o
 
 binaries = $(bins) $(objs)
 

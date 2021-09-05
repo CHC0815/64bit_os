@@ -105,7 +105,7 @@ BigRealMode:
     ; cx counter
     mov cx, 203*16*63/100       ; total sectors in image        --> read 100 sectors each time
     xor ebx, ebx                ; start sector
-    mov edi, 0x3000000          ; dest
+    mov edi, 0x30000000          ; dest
     xor ax, ax
     mov fs, ax
 

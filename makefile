@@ -1,4 +1,4 @@
-.PHONY: lib userland clean
+.PHONY: lib userland clean mount unmount
 
 clean:
 	$(MAKE) -C boot clean
@@ -20,3 +20,14 @@ userland:
 	$(MAKE) -C userland/idle all
 loader:
 	$(MAKE) -C boot/loader all
+
+mount:
+	powershell.exe -Command "osfmount.com -a -t file -f .\boot\os.img -o rw -m O: -v 1"
+unmount:
+	powershell.exe -Command "osfmount.com -D -m O:"
+
+copy: clean lib all userland loader mount
+	sleep 10
+	powershell.exe -Command "Copy-Item "boot/kernel.bin" -Destination "O:\kernel.bin" "
+	sleep 2
+	make unmount

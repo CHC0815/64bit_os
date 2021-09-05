@@ -9,10 +9,11 @@
 
 void KMain(void)
 {
-    init_idt();
-    init_memory();
-    init_kvm();
-    init_system_call();
-    init_process();
-    launch();
+    printk("Kernel running");
+    // init_idt();
+    // init_memory();
+    // init_kvm();
+    // init_system_call();
+    // init_process();
+    // launch();
 }

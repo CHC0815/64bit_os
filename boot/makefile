@@ -4,7 +4,7 @@ CFLAGS = -std=c99 -mcmodel=large -ffreestanding -fno-stack-protector -mno-red-zo
 LDFLAGS = -nostdlib -T link.lds
 
 
-bins = boot.bin loader.bin
+bins = 
 objs = kernel.o trapa.o liba.o main.o trap.o print.o debug.o memory.o process.o syscall.o lib.o keyboard.o
 
 binaries = $(bins) $(objs)
@@ -21,17 +21,11 @@ DEPS = $(wildcard *.h)
 	nasm -f bin -o $@ $<
 
 
-all: $(binaries)
+all: clean $(binaries)
 	$(LD) $(LDFLAGS) -o kernel $(objs)
 	objcopy -O binary kernel kernel.bin
-	dd if=boot.bin of=boot.img bs=512 count=1 conv=notrunc
-	dd if=loader.bin of=boot.img bs=512 count=5 seek=1 conv=notrunc
-	dd if=kernel.bin of=boot.img bs=512 count=100 seek=6 conv=notrunc
-	dd if=user1.bin of=boot.img bs=512 count=10 seek=106 conv=notrunc
-	dd if=console.bin of=boot.img bs=512 count=10 seek=116 conv=notrunc
-	dd if=idle.bin of=boot.img bs=512 count=10 seek=126 conv=notrunc
 
-run: clean all
+run: all
 	echo c | bochs
 	# /mnt/c/Program\ Files/Bochs-2.7/bochs.exe -f 'S:\Programming\64bit_os\win_bochsrc.bxrc'
 
