@@ -68,22 +68,43 @@ static struct ProcessControl *get_pc(void)
     return &pc;
 }
 
-void init_process(void)
+static void init_idle_process(void)
 {
-    struct ProcessControl *process_control;
     struct Process *process;
+    struct ProcessControl *process_control;
+
+    process = find_unused_process();
+    ASSERT(process == &process_table[0]);
+
+    process->pid = 0;
+    process->page_map = P2V(read_cr3());
+    process->state = PROC_RUNNING;
+
+    process_control->current_process = process;
+}
+
+static void init_user_process(void)
+{
+    struct Process *process;
+    struct ProcessControl *process_control;
     struct HeadList *list;
-    uint64_t addr[3] = {0x20000, 0x30000, 0x40000};
 
     process_control = get_pc();
     list = &process_control->ready_list;
 
-    for (int i = 0; i < 3; i++)
-    {
-        process = find_unused_process();
-        set_process_entry(process, addr[i]);
-        append_list_tail(list, (struct List *)process);
-    }
+    process = alloc_new_process();
+    ASSERT(process != NULL);
+
+    ASSERT(setup_uvm(process->page_map, P2V(0x30000), 5120));
+
+    process->state = PROC_READY;
+    append_list_tail(list, (struct List *)process);
+}
+
+void init_process(void)
+{
+    init_idle_process();
+    init_user_process();
 }
 
 void launch(void)

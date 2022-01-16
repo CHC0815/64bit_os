@@ -92,9 +92,12 @@ InitPIC:
     retf
 
 KernelEntry:
+    xor ax, ax
+    mov ss, ax
     mov rsp,0xffff800000200000
     call KMain                      ; stack pointer for c code        --> points to the same physical page / address 0x200000
 
 End:
+    sti
     hlt
     jmp End
